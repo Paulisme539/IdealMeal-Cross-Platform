@@ -36,6 +36,7 @@ import java.util.List;
 
 import edu.illinois.cs.cs125.spring2020.mp.logic.DefaultTargets;
 import edu.illinois.cs.cs125.spring2020.mp.logic.LatLngUtils;
+import edu.illinois.cs.cs125.spring2020.mp.logic.TargetVisitChecker;
 
 /*
  * Welcome to the Machine Project app!
@@ -185,8 +186,12 @@ public final class GameActivity extends AppCompatActivity {
 
         // Use the provided placeMarker function to add a marker at every target's location
         // HINT: onCreate initializes the relevant arrays (targetLats, targetLngs) for you
+        for (int i = 0; i <= targetLats.length - 1; i++) {
+            for (int j = 0; j <= targetLngs.length - 1; j++) {
+                placeMarker(targetLats[i], targetLngs[j]);
+            }
+        }
     }
-
     /**
      * Called when a high-confidence location update is available.
      * <p>
@@ -205,7 +210,24 @@ public final class GameActivity extends AppCompatActivity {
         // When the player gets within the PROXIMITY_THRESHOLD of a target, it should be captured and turned green
         // Sequential captures should create green connecting lines on the map
         // HINT: Use the provided changeMarkerColor and addLine functions to manipulate the map
-        // HINT: Use the provided color constants near the top of this file as arguments to those functions
+        // HINT: Use the provided color constants near the top of this file as arguments to those function
+        for (int i = 0; i <= targetLats.length - 1; i++) {
+            for (int j = 0; j <= targetLngs.length - 1; j++) {
+                if (TargetVisitChecker.isTargetWithinRange(targetLats, targetLngs, i, latitude,
+                        longitude, PROXIMITY_THRESHOLD)) {
+                    if (TargetVisitChecker.isTargetVisited(path, i)) {
+                        TargetVisitChecker.visitTarget(path, i);
+                        changeMarkerColor(targetLats[i], targetLngs[j], PLAYER_COLOR);
+                    }
+                }
+            }
+        }
+        for (int i = 0; i <= path.length - 1; i++) {
+            addLine(targetLats[i - 1], targetLngs[i - 1], targetLats[i], targetLngs[i], PLAYER_COLOR);
+            if (path[i] == -1) {
+                break;
+            }
+        }
     }
 
     /**

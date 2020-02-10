@@ -65,8 +65,9 @@ public class TargetVisitChecker {
                                               final double currentLatitude, final double currentLongitude,
                                               final int range) {
         // HINT: To find the distance in meters between two locations, use a provided helper function:
-        // LatLngUtils.distance(oneLatitude, oneLongitude, otherLatitude, otherLongitude)
-        return false;
+        //LatLngUtils.distance(oneLatitude, oneLongitude, otherLatitude, otherLongitude)
+        return (LatLngUtils.distance(latitudes[targetIndex], longitudes[targetIndex],
+                currentLatitude, currentLongitude) <= range);
     }
 
     /**
@@ -83,6 +84,13 @@ public class TargetVisitChecker {
      */
     public static boolean isTargetVisited(final int[] path, final int targetIndex) {
         // HINT: The user can capture targets in many different orders. Target #0 is not necessarily captured first.
+        for (int i = 0; i <= path.length - 1; i++) {
+            if (path[i] != -1) {
+                if (path[i] == targetIndex) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -108,6 +116,13 @@ public class TargetVisitChecker {
                                         final int range) {
         // HINT: Implement isTargetWithinRange and isTargetVisited (above) first.
         // Then you can call them in this function.
+        for (int i = 0; i <= path.length - 1; i++) {
+            if (!isTargetVisited(path, i)) {
+                if (isTargetWithinRange(latitudes, longitudes, i, currentLatitude, currentLongitude, range)) {
+                    return i;
+                }
+            }
+        }
         return -1;
     }
 
@@ -133,13 +148,32 @@ public class TargetVisitChecker {
      * @param tryVisit index of the target to try to visit
      * @return whether the target can be claimed
      */
+
     public static boolean checkSnakeRule(final double[] latitudes, final double[] longitudes,
-                                         final int[] path, final int tryVisit) {
-        // HINT: To determine whether two lines cross, use a provided helper function:
-        // LineCrossDetector.linesCross(oneStartLat, oneStartLng, oneEndLat, oneEndLng,
-        //                              otherStartLat, otherStartLng, otherEndLat, otherEndLng)
+                                         final int[] path, final int tryVisit)  {
+        int lastIndex = 0;
+        for (int i = 0; i <= path.length - 1; i++) {
+            if (path[i] == -1) {
+                lastIndex = i - 1;
+                break;
+            }
+        }
+        for (int i = 0; i <= path.length - 1; i++) {
+            if (path[i] != -1) {
+                if (i > 0) {
+                    if (LineCrossDetector.linesCross(latitudes[i - 1], longitudes[i - 1],
+                            latitudes[i], longitudes[i], latitudes[lastIndex], longitudes[lastIndex],
+                            latitudes[tryVisit], longitudes[tryVisit])) {
+                        return false;
+                    }
+                }
+            }
+        }
         return true;
     }
+        // HINT: To determine whether two lines cross, use a provided helper function:
+         //LineCrossDetector.linesCross(oneStartLat, oneStartLng, oneEndLat, oneEndLng,
+    // otherStartLat, otherStartLng, otherEndLat, otherEndLng)
 
     /**
      * Marks a target captured by putting its index in the first available (-1) slot of the path array.
@@ -151,9 +185,15 @@ public class TargetVisitChecker {
      * @return the index in the path array that was updated, or -1 if the path array was full
      */
     public static int visitTarget(final int[] path, final int targetIndex) {
-        return -1;
+        for (int i = 0; i <= path.length - 1; i++) {
+            if (path[i] == -1) {
+                path[i] = targetIndex;
+                return i;
+            }
+        }
         // HINT: The return value of this function will be useful in GameActivity.
+        return -1;
     }
-
 }
+
 
