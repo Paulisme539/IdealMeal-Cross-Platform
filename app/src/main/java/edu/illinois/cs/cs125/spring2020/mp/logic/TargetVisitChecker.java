@@ -152,21 +152,21 @@ public class TargetVisitChecker {
     public static boolean checkSnakeRule(final double[] latitudes, final double[] longitudes,
                                          final int[] path, final int tryVisit)  {
         int lastIndex = 0;
-        for (int i = 0; i <= path.length - 1; i++) {
+        for (int i = 0; i < path.length; i++) {
             if (path[i] == -1) {
                 lastIndex = i - 1;
                 break;
             }
         }
-        for (int i = 0; i <= path.length - 1; i++) {
-            if (path[i] != -1) {
-                if (i > 0) {
-                    if (LineCrossDetector.linesCross(latitudes[i - 1], longitudes[i - 1],
-                            latitudes[i], longitudes[i], latitudes[lastIndex], longitudes[lastIndex],
-                            latitudes[tryVisit], longitudes[tryVisit])) {
-                        return false;
-                    }
-                }
+        if (lastIndex <= 0) {
+            return true;
+        }
+        for (int i = 0; i < lastIndex; i++) {
+            if (LineCrossDetector.linesCross(latitudes[path[i]], longitudes[path[i]],
+                    latitudes[path[i + 1]], longitudes[path[i + 1]], latitudes[path[lastIndex]],
+                    longitudes[path[lastIndex]],
+                    latitudes[tryVisit], longitudes[tryVisit])) {
+                return false;
             }
         }
         return true;

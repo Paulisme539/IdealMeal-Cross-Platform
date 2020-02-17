@@ -186,10 +186,8 @@ public final class GameActivity extends AppCompatActivity {
 
         // Use the provided placeMarker function to add a marker at every target's location
         // HINT: onCreate initializes the relevant arrays (targetLats, targetLngs) for you
-        for (int i = 0; i <= targetLats.length - 1; i++) {
-            for (int j = 0; j <= targetLngs.length - 1; j++) {
-                placeMarker(targetLats[i], targetLngs[j]);
-            }
+        for (int i = 0; i < path.length; i++) {
+            placeMarker(targetLats[i], targetLngs[i]);
         }
     }
     /**
@@ -211,21 +209,16 @@ public final class GameActivity extends AppCompatActivity {
         // Sequential captures should create green connecting lines on the map
         // HINT: Use the provided changeMarkerColor and addLine functions to manipulate the map
         // HINT: Use the provided color constants near the top of this file as arguments to those function
-        for (int i = 0; i <= targetLats.length - 1; i++) {
-            for (int j = 0; j <= targetLngs.length - 1; j++) {
-                if (TargetVisitChecker.isTargetWithinRange(targetLats, targetLngs, i, latitude,
-                        longitude, PROXIMITY_THRESHOLD)) {
-                    if (TargetVisitChecker.isTargetVisited(path, i)) {
-                        TargetVisitChecker.visitTarget(path, i);
-                        changeMarkerColor(targetLats[i], targetLngs[j], PLAYER_COLOR);
-                    }
+        int targetIndex = TargetVisitChecker.getVisitCandidate(targetLats, targetLngs, path,
+                latitude, longitude, PROXIMITY_THRESHOLD);
+        if (targetIndex != -1) {
+            if (TargetVisitChecker.checkSnakeRule(targetLats, targetLngs, path, targetIndex)) {
+                int currIndex = TargetVisitChecker.visitTarget(path, targetIndex);
+                changeMarkerColor(targetLats[targetIndex], targetLngs[targetIndex], CAPTURED_MARKER_HUE);
+                if (currIndex >= 1) {
+                    addLine(targetLats[path[currIndex - 1]], targetLngs[path[currIndex - 1]],
+                            targetLats[targetIndex], targetLngs[targetIndex], PLAYER_COLOR);
                 }
-            }
-        }
-        for (int i = 0; i <= path.length - 1; i++) {
-            addLine(targetLats[i - 1], targetLngs[i - 1], targetLats[i], targetLngs[i], PLAYER_COLOR);
-            if (path[i] == -1) {
-                break;
             }
         }
     }
