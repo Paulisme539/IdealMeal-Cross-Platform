@@ -6,7 +6,9 @@ import com.google.android.gms.maps.GoogleMap;
 import android.graphics.Color;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-@SuppressWarnings("checkstyle:LeftCurly")
+/**
+ * Holds method for area mode gameplay.
+ */
 public class AreaDivider extends java.lang.Object {
 
     /** The latitude of the north border. */
@@ -20,6 +22,14 @@ public class AreaDivider extends java.lang.Object {
     /** The expected size of each cell. */
     private int cellSize;
 
+    /**
+     * Creates an AreaDivider for an area.
+     * @param setNorth Sets north variable.
+     * @param setEast Sets east variable.
+     * @param setSouth Sets south variable.
+     * @param setWest Sets west variable.
+     * @param setCellSize Sets cell size variable.
+     */
     public AreaDivider(final double setNorth, final double setEast, final double setSouth,
                        final double setWest, final int setCellSize) {
         north = setNorth;

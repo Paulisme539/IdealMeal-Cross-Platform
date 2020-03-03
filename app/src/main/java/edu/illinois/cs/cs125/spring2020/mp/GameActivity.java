@@ -248,7 +248,7 @@ public final class GameActivity extends AppCompatActivity {
         }
     }
 
-    /*
+    /**
      * Called when a high-confidence location update is available.
      * <p>
      * You need to implement this function to make the game work.
