@@ -41,8 +41,8 @@ public class AreaDivider extends java.lang.Object {
 
     /**
      * Returns the index of a cell as a LatLngBounds object.
-     * @param x the x coordinate of the cell
-     * @param y the y coordinate of the cell
+     * @param x the cell's x coordinate
+     * @param y the cell's y coordinate
      * @return the LatLngBounds boundaries of the cell
      */
     public LatLngBounds getCellBounds(final int x, final int y) {
