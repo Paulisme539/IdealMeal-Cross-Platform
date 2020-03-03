@@ -28,12 +28,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import edu.illinois.cs.cs125.spring2020.mp.logic.AreaDivider;
 import edu.illinois.cs.cs125.spring2020.mp.logic.DefaultTargets;
 import edu.illinois.cs.cs125.spring2020.mp.logic.LatLngUtils;
 import edu.illinois.cs.cs125.spring2020.mp.logic.TargetVisitChecker;
@@ -84,7 +86,7 @@ public final class GameActivity extends AppCompatActivity {
     private BroadcastReceiver locationUpdateReceiver;
 
     /** A reference to the map control. */
-    private GoogleMap map;
+    private static GoogleMap map;
 
     /** Whether the user's location has been found and used to center the map. */
     private boolean centeredMap;
@@ -104,6 +106,40 @@ public final class GameActivity extends AppCompatActivity {
     /** The sequence of target indexes captured by the player (-1 if none). */
     private int[] path;
 
+    /** The boolean array that returns whether target has been captured. */
+    private boolean[][] visitArray;
+
+    /** A reference to AreaDivider. */
+    private AreaDivider divider;
+
+    /** The type of mode to be executed on the app. */
+    private String gameMode;
+
+    /** The latitude of the north border. */
+    private double north;
+
+    /** The longitude of the east border. */
+    private double east;
+
+    /** The latitude of the south border. */
+    private double south;
+
+    /** The longitude of the west border. */
+    private double west;
+
+    /** The expected size of each cell. */
+    private int cellSize;
+
+    /** The x coordinate of the cell previously visited in area mode. */
+    private int prevX;
+
+    /** The y coordinate of the cell previously visited in area mode. */
+    private int prevY;
+
+    /** A counter that keeps track of the number of cells visited in area mode. */
+    private int captures = 0;
+
+
     /**
      * Called by the Android system when the activity is to be set up.
      * <p>
@@ -120,13 +156,25 @@ public final class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
         Log.v(TAG, "Created");
 
-        // Load the predefined targets
-        targetLats = DefaultTargets.getLatitudes(this);
-        targetLngs = DefaultTargets.getLongitudes(this);
-        path = new int[targetLats.length];
-        Arrays.fill(path, -1); // No targets visited initially
+        Intent intent = getIntent();
+        gameMode = intent.getStringExtra("mode");
 
-        // Start the process of getting a Google Maps object for the map
+        if (gameMode.equals("target")) {
+            // Load the predefined targets
+            targetLats = DefaultTargets.getLatitudes(this);
+            targetLngs = DefaultTargets.getLongitudes(this);
+            path = new int[targetLats.length];
+            Arrays.fill(path, -1); // No targets visited initially
+        } else if (gameMode.equals("area")) {
+            north = intent.getDoubleExtra("areaNorth", 0);
+            east = intent.getDoubleExtra("areaEast", 0);
+            south = intent.getDoubleExtra("areaSouth", 0);
+            west = intent.getDoubleExtra("areaWest", 0);
+            cellSize = intent.getIntExtra("cellSize", 0);
+            divider = new AreaDivider(north, east, south, west, cellSize);
+            visitArray = new boolean[divider.getXCells()][divider.getYCells()];
+        }
+            // Start the process of getting a Google Maps object for the map
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.gameMap);
         mapFragment.getMapAsync(view -> {
@@ -149,6 +197,7 @@ public final class GameActivity extends AppCompatActivity {
                 }
             }
         };
+
         // Register (activate) it
         LocalBroadcastManager.getInstance(this).registerReceiver(locationUpdateReceiver,
                 new IntentFilter(LocationListenerService.UPDATE_ACTION));
@@ -186,11 +235,20 @@ public final class GameActivity extends AppCompatActivity {
 
         // Use the provided placeMarker function to add a marker at every target's location
         // HINT: onCreate initializes the relevant arrays (targetLats, targetLngs) for you
-        for (int i = 0; i < path.length; i++) {
-            placeMarker(targetLats[i], targetLngs[i]);
+
+        Intent intent = getIntent();
+        gameMode = intent.getStringExtra("mode");
+        if (gameMode.equals("area")) {
+            divider = new AreaDivider(north, east, south, west, cellSize);
+            divider.renderGrid(map);
+        } else if (gameMode.equals("target")) {
+            for (int i = 0; i < path.length; i++) {
+                placeMarker(targetLats[i], targetLngs[i]);
+            }
         }
     }
-    /**
+
+    /*
      * Called when a high-confidence location update is available.
      * <p>
      * You need to implement this function to make the game work.
@@ -209,15 +267,47 @@ public final class GameActivity extends AppCompatActivity {
         // Sequential captures should create green connecting lines on the map
         // HINT: Use the provided changeMarkerColor and addLine functions to manipulate the map
         // HINT: Use the provided color constants near the top of this file as arguments to those function
-        int targetIndex = TargetVisitChecker.getVisitCandidate(targetLats, targetLngs, path,
-                latitude, longitude, PROXIMITY_THRESHOLD);
-        if (targetIndex != -1) {
-            if (TargetVisitChecker.checkSnakeRule(targetLats, targetLngs, path, targetIndex)) {
-                int currIndex = TargetVisitChecker.visitTarget(path, targetIndex);
-                changeMarkerColor(targetLats[targetIndex], targetLngs[targetIndex], CAPTURED_MARKER_HUE);
-                if (currIndex >= 1) {
-                    addLine(targetLats[path[currIndex - 1]], targetLngs[path[currIndex - 1]],
-                            targetLats[targetIndex], targetLngs[targetIndex], PLAYER_COLOR);
+        Intent intent = getIntent();
+        int proximityThreshold = intent.getIntExtra("proximityThreshold", PROXIMITY_THRESHOLD);
+        if (gameMode.equals("area")) {
+            PolygonOptions shape = new PolygonOptions();
+            LatLng point = new LatLng(latitude, longitude);
+            int x = divider.getXIndex(point);
+            int y = divider.getYIndex(point);
+            LatLng southwest = divider.getCellBounds(x, y).southwest;
+            LatLng northeast = divider.getCellBounds(x, y).northeast;
+            LatLng northwest = new LatLng(northeast.latitude, southwest.longitude);
+            LatLng southeast = new LatLng(southwest.latitude, northeast.longitude);
+            if (latitude < north && latitude > south && longitude > west && longitude < east) {
+                if (!visitArray[x][y]) {
+                    if (captures == 0) {
+                        shape.add(southwest, northwest, northeast, southeast).fillColor(Color.GREEN);
+                        map.addPolygon(shape);
+                        visitArray[x][y] = true;
+                        prevX = x;
+                        prevY = y;
+                        captures++;
+                    } else if ((Math.abs(prevX - x) + Math.abs(prevY - y)) == 1) {
+                        shape.add(southwest, northwest, northeast, southeast).fillColor(Color.GREEN);
+                        map.addPolygon(shape);
+                        visitArray[x][y] = true;
+                        prevX = x;
+                        prevY = y;
+                        captures++;
+                    }
+                }
+            }
+        } else if (gameMode.equals("target")) {
+            int targetIndex = TargetVisitChecker.getVisitCandidate(targetLats, targetLngs, path,
+                    latitude, longitude, proximityThreshold);
+            if (targetIndex != -1) {
+                if (TargetVisitChecker.checkSnakeRule(targetLats, targetLngs, path, targetIndex)) {
+                    int currIndex = TargetVisitChecker.visitTarget(path, targetIndex);
+                    changeMarkerColor(targetLats[targetIndex], targetLngs[targetIndex], CAPTURED_MARKER_HUE);
+                    if (currIndex >= 1) {
+                        addLine(targetLats[path[currIndex - 1]], targetLngs[path[currIndex - 1]],
+                                targetLats[targetIndex], targetLngs[targetIndex], PLAYER_COLOR);
+                    }
                 }
             }
         }
@@ -252,7 +342,7 @@ public final class GameActivity extends AppCompatActivity {
      * @param color the color to fill the line with
      */
     @VisibleForTesting
-    public void addLine(final double startLat, final double startLng,
+    public static void addLine(final double startLat, final double startLng,
                         final double endLat, final double endLng, final int color) {
         // Package the loose coordinates into LatLng objects usable by Google Maps
         LatLng start = new LatLng(startLat, startLng);
@@ -373,5 +463,4 @@ public final class GameActivity extends AppCompatActivity {
         stopService(new Intent(this, LocationListenerService.class));
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
-
 }
