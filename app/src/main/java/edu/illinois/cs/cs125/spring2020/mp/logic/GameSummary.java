@@ -6,11 +6,18 @@ import com.google.gson.JsonObject;
 
 import edu.illinois.cs.cs125.spring2020.mp.R;
 
+/**
+ * Extracts summary information about a game from JSON provided by the server.
+ */
 public class GameSummary extends java.lang.Object {
 
     /** JsonObject that contains relevant game information. */
     private com.google.gson.JsonObject infoFromServer;
 
+    /**
+     * Creates a game summary from JSON from the server.
+     * @param setInfoFromServer JsonObject input that contains relevant game information.
+     */
     public GameSummary(final com.google.gson.JsonObject setInfoFromServer) {
         infoFromServer = setInfoFromServer;
     }

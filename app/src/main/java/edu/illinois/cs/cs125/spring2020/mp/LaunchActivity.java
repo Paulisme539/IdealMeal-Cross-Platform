@@ -9,6 +9,9 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Represents the launch screen of the app, where the user can login to games.
+ */
 public class LaunchActivity extends AppCompatActivity {
 
     /** Discretional constant that functions as sign-in request code. */
