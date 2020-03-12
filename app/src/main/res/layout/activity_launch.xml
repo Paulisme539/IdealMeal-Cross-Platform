@@ -6,4 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".LaunchActivity">
 
+    <Button
+        android:id="@+id/goLogin"
+        android:layout_width="185dp"
+        android:layout_height="59dp"
+        android:text="Login"
+        tools:layout_editor_absoluteX="113dp"
+        tools:layout_editor_absoluteY="488dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

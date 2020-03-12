@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,6 +26,7 @@ public final class MainActivity extends AppCompatActivity {
 
     /**
      * Called by the Android system when the activity is to be set up.
+     *
      * @param savedInstanceState info from the previously terminated instance (unused)
      */
     @Override
@@ -61,8 +63,7 @@ public final class MainActivity extends AppCompatActivity {
             response -> {
                 findViewById(R.id.loadGroup).setVisibility(View.GONE);
                 setUpUi(response);
-            },
-            error -> {
+            }, error -> {
                 findViewById(R.id.progressSpinner).setVisibility(View.GONE);
                 findViewById(R.id.retryConnectButton).setVisibility(View.VISIBLE);
                 Toast.makeText(this, R.string.connection_failed, Toast.LENGTH_LONG).show();
@@ -72,6 +73,7 @@ public final class MainActivity extends AppCompatActivity {
 
     /**
      * Sets up the UI with data retrieved from the server.
+     *
      * @param result parsed JSON from the server
      */
     private void setUpUi(final JsonObject result) {
@@ -107,6 +109,8 @@ public final class MainActivity extends AppCompatActivity {
                 // Get buttons specific to ongoing games
                 Button enter = chunk.findViewById(R.id.enterGame);
                 Button leave = chunk.findViewById(R.id.leaveGame);
+                leave.setOnClickListener(unused -> leaveButtonClick(gameId, invitationsLayout, ongoingLayout));
+                enter.setOnClickListener(unused -> enterButtonClick(gameId));
                 // The Leave button should be gone if the user owns the game
                 if (gameOwner.equals(myEmail)) {
                     leave.setVisibility(View.GONE);
@@ -120,6 +124,11 @@ public final class MainActivity extends AppCompatActivity {
                 // Add it to the invitations list
                 invitationsLayout.addView(chunk);
                 // Get buttons specific to invitations?
+                Button decline = chunk.findViewById(R.id.declineInvite);
+                Button accept = chunk.findViewById(R.id.acceptInvite);
+                decline.setOnClickListener(unused -> declineButtonClick(gameId, invitationsLayout, ongoingLayout));
+                accept.setOnClickListener(unused -> acceptButtonClick(gameId, invitationsLayout, ongoingLayout));
+
             } else {
                 // Avoid the label-setting code below, since no chunk was created
                 continue;
@@ -133,4 +142,67 @@ public final class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Makes a web POST Request from activating decline button.
+     * @param gameID the game id
+     * @param invitationsLayout the LinearLayout object list of invitations
+     * @param ongoingGames the LinearLayout object list of ongoing games
+     */
+    private void declineButtonClick(final String gameID, final LinearLayout invitationsLayout,
+                                    final LinearLayout ongoingGames) {
+        WebApi.startRequest(this, WebApi.API_BASE + "/games/" + gameID + "/decline",
+                Request.Method.POST, null, response -> {
+                invitationsLayout.removeAllViews();
+                ongoingGames.removeAllViews();
+                connect();
+            }, error -> {
+                System.out.println("Error");
+            });
+    }
+
+    /**
+     * Makes a web POST Request from activating accept button.
+     * @param gameID the game id
+     * @param invitationsLayout the LinearLayout object list of invitations
+     * @param ongoingGames the LinearLayout object list of ongoing games
+     */
+    private void acceptButtonClick(final String gameID, final LinearLayout invitationsLayout,
+                                   final LinearLayout ongoingGames) {
+        WebApi.startRequest(this, WebApi.API_BASE + "/games/" + gameID + "/accept",
+                Request.Method.POST, null, response -> {
+                invitationsLayout.removeAllViews();
+                ongoingGames.removeAllViews();
+                connect();
+            }, error -> {
+                System.out.println("Error");
+            });
+    }
+
+    /**
+     * Makes a web POST Request from activating leave button.
+     * @param gameID the game id
+     * @param invitationsLayout the LinearLayout object list of invitations
+     * @param ongoingGames the LinearLayout object list of ongoing games
+     */
+    private void leaveButtonClick(final String gameID, final LinearLayout invitationsLayout,
+                                  final LinearLayout ongoingGames) {
+        WebApi.startRequest(this, WebApi.API_BASE + "/games/" + gameID + "/leave",
+                Request.Method.POST, null, response -> {
+                invitationsLayout.removeAllViews();
+                ongoingGames.removeAllViews();
+                connect();
+            }, error -> {
+                System.out.println("Error");
+            });
+    }
+
+    /**
+     * Passes intent through to start activity after clicking enter button.
+     * @param gameId the game id
+     */
+    private void enterButtonClick(final String gameId) {
+        Intent intent = new Intent(this, GameActivity.class);
+        intent.putExtra("game", gameId);
+        startActivity(intent);
+    }
 }

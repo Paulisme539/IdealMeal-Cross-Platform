@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.content.Intent;
+import android.view.View;
+import android.widget.TextView;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -56,9 +58,16 @@ public class LaunchActivity extends AppCompatActivity {
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
-            } // else {
-            //createSignInIntent();
-            //}
+            } else {
+                TextView loginVariable = findViewById(R.id.goLogin);
+                loginVariable.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        loginVariable.setText("Retry Login");
+                        createSignInIntent();
+                    }
+                });
+            }
         }
     }
 }
