@@ -1,6 +1,7 @@
 package edu.illinois.cs.cs125.spring2020.mp;
 
 import android.content.Intent;
+//import android.graphics.LinearGradient;
 import android.graphics.Point;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -62,7 +63,20 @@ public final class NewGameActivity extends AppCompatActivity {
         setTitle(R.string.create_game);
 
         modeGroup = findViewById(R.id.gameModeGroup);
-
+        LinearLayout view = findViewById(R.id.areaSettings);
+        LinearLayout view2 = findViewById(R.id.targetSettings);
+        view.setVisibility(View.GONE);
+        view2.setVisibility(View.GONE);
+        modeGroup.setOnCheckedChangeListener((unused, checkedId) -> {
+            // checkedId is the R.id constant of the currently checked RadioButton
+            if (checkedId == R.id.targetModeOption) {
+                view2.setVisibility(View.VISIBLE);
+                view.setVisibility(View.GONE);
+            } else if  (checkedId == R.id.areaModeOption) {
+                view.setVisibility(View.VISIBLE);
+                view2.setVisibility(View.GONE);
+            }
+        });
         // Register button click handlers on the add-invitee and create-game buttons
         findViewById(R.id.addInvitee).setOnClickListener(unused -> addInvitee());
         findViewById(R.id.createGame).setOnClickListener(unused -> tryCreate());
