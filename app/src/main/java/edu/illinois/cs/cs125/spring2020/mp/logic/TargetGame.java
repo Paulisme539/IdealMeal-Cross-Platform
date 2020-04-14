@@ -233,7 +233,7 @@ public final class TargetGame extends Game {
         }
     }
 
-    /*
+    /**
      * Adds a target to a player's path.
      * <p>
      * Updates the game state (the player's path list in playerPaths) and places a line on
