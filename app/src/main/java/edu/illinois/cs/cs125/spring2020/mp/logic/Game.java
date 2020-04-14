@@ -23,7 +23,7 @@ import edu.illinois.cs.cs125.spring2020.mp.R;
  * <p>
  * This is only used starting in Checkpoint 4.
  */
-public abstract class Game {
+public abstract class  Game {
 
     /** The current user's email. */
     private String email;
@@ -99,7 +99,6 @@ public abstract class Game {
     protected final Context getContext() {
         return context;
     }
-
     /**
      * Sends a message to the server.
      * @param message JSON object to send
@@ -132,7 +131,16 @@ public abstract class Game {
      */
     public final int getWinningTeam() {
         // For you to implement
-        return 0;
+        int winningTeam = 0;
+        int winningScore = 0;
+        for (int i = 1; i < TeamID.NUM_TEAMS + 1; i++) {
+            if (getTeamScore(i) > winningScore) {
+                winningScore = getTeamScore(i);
+                winningTeam = i;
+            }
+
+        }
+        return winningTeam;
     }
 
     /**
