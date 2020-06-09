@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:idealmealv1/activity_screens/aboutus.dart';
 import 'package:idealmealv1/activity_screens/home.dart';
-import 'package:idealmealv1/activity_screens/menu.dart';
 import 'package:idealmealv1/main.dart';
 
 class RestaurantPage extends StatelessWidget {
@@ -51,12 +50,6 @@ class RestaurantPage extends StatelessWidget {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => RestaurantPage()));
                 }),
             ListTile(
-                title: Text("Menus"),
-                trailing: Icon(Icons.arrow_forward),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => MenuPage()));
-                }),
-            ListTile(
                 title: Text("About Us"),
                 trailing: Icon(Icons.arrow_forward),
                 onTap: () {
@@ -64,14 +57,19 @@ class RestaurantPage extends StatelessWidget {
                 })],
         ),
       ),
-      body: new ListView.builder(
+      body: buildListView(),
+    );
+  }
+
+  ListView buildListView() {
+    return ListView.builder(
         itemCount: restaurants.length,
         itemBuilder: (BuildContext ctxt, int index) {
-          return new Text(restaurants[index]);
-        },
-
-      ),
-
+          return ListTile(
+            title: Text(restaurants[index]),
+            trailing: Icon(Icons.arrow_forward)
+          );
+      },
     );
   }
 }

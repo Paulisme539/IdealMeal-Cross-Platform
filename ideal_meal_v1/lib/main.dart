@@ -2,17 +2,29 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:idealmealv1/activity_screens/aboutus.dart';
-import 'package:idealmealv1/activity_screens/menu.dart';
 import 'package:idealmealv1/activity_screens/restaurants.dart';
 import 'package:csv/csv.dart' as csv;
 
-List<String> restaurants;
+List<String> restaurants = [];
 List<List> restaurantMenuItems;
 
 void main() {
+  File CSVFile = new File('/Users/user/AndroidStudioProjects/MP-Spring2020-JacobDanielLee/ideal_meal_v1/WorkingDocIdealMeal.csv');
+  List<List<dynamic>> csv = csvToList(CSVFile);
+  for (int i=0; i<csv.length; i++) {
+    if(csv[i][2].compareTo('Restaurant') != 0 || csv[i][2].length != 0) {
+      if (restaurants.length != 0) {
+        for (int j = 0; j < restaurants.length; j++) {
+          if (csv[i][2].compareTo(restaurants[j]) != 0) {
+            restaurants.add(csv[i][2]);
+          }
+        }
+      } else {
+        restaurants.add(csv[i][2]);
+      }
+    }
+  }
   runApp(MyApp());
-  File CSVFile = new File("WorkingDocIdealMeal.csv");
-  
 }
 
 class MyApp extends StatelessWidget {
@@ -89,12 +101,6 @@ class _MyHomePageState extends StatelessWidget {
               Navigator.push(context, MaterialPageRoute(builder: (context) => RestaurantPage()));
           }),
           ListTile(
-            title: Text("Menus"),
-            trailing: Icon(Icons.arrow_forward),
-          onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => MenuPage()));
-          }),
-          ListTile(
             title: Text("About Us"),
             trailing: Icon(Icons.arrow_forward),
         onTap: () {
@@ -133,7 +139,7 @@ class _MyHomePageState extends StatelessWidget {
   }
 }
 
-List<List> csvToList(File myCSVFile) {
+List<List<dynamic>> csvToList(File myCSVFile) {
   csv.CsvToListConverter c =
       new csv.CsvToListConverter(eol: "\r\n", fieldDelimiter: ",", shouldParseNumbers: true);
   List<List> listCreated = c.convert(myCSVFile.readAsStringSync());

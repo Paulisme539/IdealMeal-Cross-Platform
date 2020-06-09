@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:idealmealv1/activity_screens/aboutus.dart';
-import 'package:idealmealv1/activity_screens/menu.dart';
 import 'package:idealmealv1/activity_screens/restaurants.dart';
 
 
@@ -48,12 +47,6 @@ class MyHomePage extends StatelessWidget {
                 trailing: Icon(Icons.arrow_forward),
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => RestaurantPage()));
-                }),
-            ListTile(
-                title: Text("Menus"),
-                trailing: Icon(Icons.arrow_forward),
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => MenuPage()));
                 }),
             ListTile(
                 title: Text("About Us"),
