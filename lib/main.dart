@@ -1,26 +1,27 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:idealmealv1/activity_screens/aboutus.dart';
 import 'package:idealmealv1/activity_screens/restaurants.dart';
 import 'package:csv/csv.dart' as csv;
 
 List<String> restaurants = [];
-List<List> restaurantMenuItems;
+List<String> restaurantMenuItems = [];
+List<List<dynamic>> csv_variable;
 
 void main() {
-  File CSVFile = new File('/Users/user/AndroidStudioProjects/MP-Spring2020-JacobDanielLee/ideal_meal_v1/WorkingDocIdealMeal.csv');
-  List<List<dynamic>> csv = csvToList(CSVFile);
-  for (int i=0; i<csv.length; i++) {
-    if(csv[i][2].compareTo('Restaurant') != 0 || csv[i][2].length != 0) {
+  loadAsset();
+  for (int i=0; i<csv_variable.length; i++) {
+    if(csv_variable[i][2].compareTo('Restaurant') != 0 || csv_variable[i][2].length != 0) {
       if (restaurants.length != 0) {
         for (int j = 0; j < restaurants.length; j++) {
-          if (csv[i][2].compareTo(restaurants[j]) != 0) {
-            restaurants.add(csv[i][2]);
+          if (csv_variable[i][2].compareTo(restaurants[j]) != 0) {
+            restaurants.add(csv_variable[i][2]);
           }
         }
       } else {
-        restaurants.add(csv[i][2]);
+        restaurants.add(csv_variable[i][2]);
       }
     }
   }
@@ -144,6 +145,12 @@ List<List<dynamic>> csvToList(File myCSVFile) {
       new csv.CsvToListConverter(eol: "\r\n", fieldDelimiter: ",", shouldParseNumbers: true);
   List<List> listCreated = c.convert(myCSVFile.readAsStringSync());
   return listCreated;
+}
+
+loadAsset() async {
+  final myData = await rootBundle.loadString('/Users/user/AndroidStudioProjects/MP-Spring2020-JacobDanielLee/ideal_meal_v1/WorkingDocIdealMeal.csv');
+  csv_variable = csv.CsvToListConverter().convert(myData);
+
 }
 
 
