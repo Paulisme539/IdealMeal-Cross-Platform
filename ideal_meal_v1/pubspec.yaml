@@ -46,7 +46,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - '/Users/user/AndroidStudioProjects/MP-Spring2020-JacobDanielLee/ideal_meal_v1/WorkingDocIdealMeal.csv'
+    - '/Users/user/AndroidStudioProjects/MP-Spring2020-JacobDanielLee/ideal_meal_v1/ideal_meal_v1/WorkingDocIdealMeal-V2.csv'
 
   # To add assets to your application, add an assets section, like this:
   # assets:

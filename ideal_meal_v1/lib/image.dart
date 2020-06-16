@@ -1,15 +1,9 @@
-import 'dart:io';
-import 'dart:async';
-
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
-import 'package:idealmealv1/activity_screens/restaurants.dart';
 import 'package:idealmealv1/activity_screens/home.dart';
-import 'package:flutter/foundation.dart';
-import 'package:csv/csv.dart' as csv;
-import 'package:path_provider/path_provider.dart' as path;
+import 'package:idealmealv1/activity_screens/restaurants.dart';
+import 'package:idealmealv1/activity_screens/aboutus.dart';
 
-class AboutUsPage extends StatelessWidget {
+class ImagePage extends StatelessWidget {
   final String title = "IdealMeal";
 
   @override
@@ -65,10 +59,4 @@ class AboutUsPage extends StatelessWidget {
       ),
     );
   }
-
-  loadAsset() async {
-    final myData = await rootBundle.loadString('WorkingDocIdealMeal-V2.csv');
-    List<List<dynamic>> dataTable = csv.CsvToListConverter().convert(myData);
-  }
 }
-
